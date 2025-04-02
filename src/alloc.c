@@ -11,11 +11,19 @@ static uint32_t temp_len = 0;
 static uint32_t temp_objects[ALLOC_TEMP_OBJECTS_MAX] = {};
 static uint32_t temp_objects_len;
 
+void init_hunk() {
+	// if (hunk == 0) {
+	// 	hunk = malloc(ALLOC_SIZE);
+	// }
+}
+
 bump_mark_t bump_mark(void) {
+	init_hunk();
 	return (bump_mark_t){.index = bump_len};
 }
 
 void *bump_alloc(uint32_t size) {
+	init_hunk();
 	error_if(bump_len + temp_len + size >= ALLOC_SIZE, "Failed to allocate %d bytes in hunk mem", size);
 	void *p = &hunk[bump_len];
 	bump_len += size;
@@ -29,6 +37,7 @@ void bump_reset(bump_mark_t mark) {
 }
 
 void *bump_from_temp(void *temp, uint32_t offset, uint32_t size) {
+	init_hunk();
 	temp_free(temp);
 	error_if(bump_len + temp_len + size >= ALLOC_SIZE, "Failed to allocate %d bytes in hunk mem", size);
 	void *p = &hunk[bump_len];
@@ -38,6 +47,7 @@ void *bump_from_temp(void *temp, uint32_t offset, uint32_t size) {
 }
 
 void *temp_alloc(uint32_t size) {
+	init_hunk();
 	size = ((size + 7) >> 3) << 3; // align to 8 bytes
 
 	error_if(bump_len + temp_len + size >= ALLOC_SIZE, "Failed to allocate %d bytes in temp mem", size);

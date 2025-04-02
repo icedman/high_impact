@@ -5,39 +5,39 @@
 // (sound_t) representing a currently playing sound, using one of the sources.
 
 #include "types.h"
-#include "../libs/pl_synth.h"
 
 // The maximum number of samples for which a sound source is decompressed
-// completely at load time. Everything above this limit will be loaded into 
+// completely at load time. Everything above this limit will be loaded into
 // memory in compressed form and only decompressed on demand.
 #if !defined(SOUND_MAX_UNCOMPRESSED_SAMPLES)
-	#define SOUND_MAX_UNCOMPRESSED_SAMPLES (64 * 1024)
+#define SOUND_MAX_UNCOMPRESSED_SAMPLES (64 * 1024)
 #endif
 
 // The maximum number of sources to be loaded at a time. This only affects
 // memory usage, but not performance.
 #if !defined(SOUND_MAX_SOURCES)
-	#define SOUND_MAX_SOURCES 128
+#define SOUND_MAX_SOURCES 128
 #endif
 
 // The maximum number of active nodes that can be mixed at time
 #if !defined(SOUND_MAX_NODES)
-	#define SOUND_MAX_NODES 32
+#define SOUND_MAX_NODES 32
 #endif
 
-
 typedef struct sound_source_t sound_source_t;
-typedef struct { uint16_t id; uint16_t index; } sound_t;
-typedef struct { uint32_t index; } sound_mark_t;
-
-// Initialized the synth for sound_source_from_synth_*()
-void sound_init_synth(void);
+typedef struct {
+  uint16_t id;
+  uint16_t index;
+} sound_t;
+typedef struct {
+  uint32_t index;
+} sound_mark_t;
 
 // Called by the engine to manage sound memory
 sound_mark_t sound_mark(void);
 void sound_reset(sound_mark_t mark);
 
-// Put all playing nodes in a halt state; useful for e.g. a pause screen
+// Put all playing nodes in a halt state; usefull for e.g. a pause screen
 void sound_halt(void);
 
 // Resume playing all halted sounds
@@ -52,24 +52,14 @@ void sound_set_global_volume(float volume);
 // Periodically called by the platform to mix playing nodes into output buffer
 void sound_mix_stereo(float *dest_samples, uint32_t dest_len);
 
-// Load a sound source from a QOA file. Calling this function multiple times with
+// Load a sound sorce from a QOA file. Calling this function multiple times with
 // the same path will return the same, cached sound source,
 sound_source_t *sound_source(char *path);
-
-// Initialize a sound source from raw samples. No ownership of the samples is
-// taken; they are not copied.
-sound_source_t *sound_source_with_samples(int16_t *samples, uint32_t len, uint32_t channels, uint32_t samplerate);
-
-// Create a sound source with the given pl_synth_sound_t definition
-sound_source_t *sound_source_synth_sound(pl_synth_sound_t *sound);
-
-// Create a sound source with the given pl_synth_song_t definition
-sound_source_t *sound_source_synth_song(pl_synth_song_t *song);
 
 // Return the duration of a sound source
 float sound_source_duration(sound_source_t *source);
 
-// Obtain a free node for the given source. This will "reserve" the source. It 
+// Obtain a free node for the given source. This will "reserve" the source. It
 // can not be re-used until it is disposed via sound_dispose(). The node will be
 // in a paused state and must be explicitly unpaused. Returns an invalid node
 // with id = 0 when no free node is available.
@@ -79,9 +69,10 @@ sound_t sound(sound_source_t *source);
 // once it has played through.
 void sound_play(sound_source_t *source);
 
-// Play a sound source with the given volume, pan and pitch. The node used to 
+// Play a sound source with the given volume, pan and pitch. The node used to
 // play it will be automatically disposed once it has played through.
-void sound_play_ex(sound_source_t *source, float volume, float pan, float pitch);
+void sound_play_ex(sound_source_t *source, float volume, float pan,
+                   float pitch);
 
 // Unpauses a paused node
 void sound_unpause(sound_t sound);
@@ -106,11 +97,11 @@ void sound_set_loop(sound_t sound, bool loop);
 // take the node's current pitch into account
 float sound_duration(sound_t sound);
 
-// Return the current position of this node in seconds. This does not take the 
+// Return the current position of this node in seconds. This does not take the
 // node's current pitch into account
 float sound_time(sound_t sound);
 
-// Set the current position of this node in seconds. This does not take the 
+// Set the current position of this node in seconds. This does not take the
 // node's current pitch into account
 void sound_set_time(sound_t sound, float time);
 

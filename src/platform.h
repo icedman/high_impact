@@ -1,46 +1,41 @@
-#ifndef HI_PLATFORM_H
-#define HI_PLATFORM_H
+#ifndef PLATFORM_H
+#define PLATFORM_H
 
-// This abstracts the underlying platform (currently SDL or Sokol). The platform
-// is responsible for setting up a window, renderer, timing and handling of input
-// events.
-// It should be possible to add further platforms (e.g. for certain consoles) 
-// without changing any other parts of high_impact... in theory.
-
+#include "input.h"
+#include "json.h"
 #include "types.h"
-#include "../libs/pl_json.h"
+#include "utils.h"
 
 // The window title, if applicable
 #if !defined(WINDOW_TITLE)
-	#define WINDOW_TITLE "High Impact Game"
+#define WINDOW_TITLE "High Impact Game"
 #endif
 
 // The default window size, if applicable
 #if !defined(WINDOW_WIDTH) || !defined(WINDOW_HEIGHT)
-	#define WINDOW_WIDTH 1280
-	#define WINDOW_HEIGHT 720
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 720
 #endif
 
 // The name of your company or handle. This may be used for the userdata
 // directory, so it should not contain any special characters
 #if !defined(GAME_VENDOR)
-	#define GAME_VENDOR "phoboslab"
+#define GAME_VENDOR "phoboslab"
 #endif
 
-// The name of your game. This may be used for the userdata directory, so it 
+// The name of your game. This may be used for the userdata directory, so it
 // should not contain any special characters
 #if !defined(GAME_NAME)
-	#define GAME_NAME "high_impact_game"
+#define GAME_NAME "high_impact_game"
 #endif
 
 #if !defined(PLATFORM_VSYNC)
-	#define PLATFORM_VSYNC 1
+#define PLATFORM_VSYNC 1
 #endif
-
 
 // The max path length when loading/storing files
 #if !defined(PLATFORM_MAX_PATH)
-	#define PLATFORM_MAX_PATH 512
+#define PLATFORM_MAX_PATH 512
 #endif
 
 // Return the current size of the window or render area in real pixels
@@ -72,7 +67,7 @@ char *platform_executable_path(void);
 // the end.
 char *platform_dirname(char *path);
 
-// Load a file from the userdata directory into temp memory. Must be freed via 
+// Load a file from the userdata directory into temp memory. Must be freed via
 // temp_free(). This can be used for save games or configuration.
 uint8_t *platform_load_userdata(const char *name, uint32_t *bytes_read);
 
@@ -86,11 +81,14 @@ void platform_exit(void);
 void platform_set_audio_mix_cb(void (*cb)(float *buffer, uint32_t len));
 
 #if defined(RENDER_SOFTWARE)
-	rgba_t *platform_get_screenbuffer(int32_t *pitch);
+rgba_t *platform_get_screenbuffer(int32_t *pitch);
 #endif
 
 #if defined(RENDER_METAL)
-	void *platform_get_metal_layer(void);
+void *platform_get_metal_layer(void);
 #endif
 
-#endif
+void platform_prepare_frame(void);
+void platform_end_frame(void);
+
+#endif // PLATFORM_H

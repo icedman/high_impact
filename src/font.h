@@ -6,39 +6,39 @@
 // file that specifies the position, size and advance width of each glyph.
 // Use the font_tool.html to create the image and json.
 
-#include "types.h"
 #include "image.h"
-#include "../libs/pl_json.h"
+#include "json.h"
+#include "types.h"
 
 typedef struct {
-	vec2_t pos;
-	vec2_t size;
-	vec2_t offset;
-	int advance;
+  vec2_t pos;
+  vec2_t size;
+  vec2_t offset;
+  int advance;
 } font_glyph_t;
 
 typedef struct {
-	// The line height when drawing multi-line text. By default, this is the
-	// image height * 1.25. Increase this to have more line spacing.
-	int line_height;
+  // The line height when drawing multi-line text. By default, this is the
+  // image height * 1.25. Increase this to have more line spacing.
+  int line_height;
 
-	// Extra spacing between each letter on a single line. Default 0
-	int letter_spacing;
+  // Extra spacing between each letter on a single line. Default 0
+  int letter_spacing;
 
-	// A tint color for this font. Default rgba_white() 
-	rgba_t color;
+  // A tint color for this font. Default rgba_white()
+  rgba_t color;
 
-	// Internal state
-	int first_char;
-	int last_char;
-	image_t *image;
-	font_glyph_t *glyphs;
+  // Internal state
+  int first_char;
+  int last_char;
+  image_t *image;
+  font_glyph_t *glyphs;
 } font_t;
 
 typedef enum {
-	FONT_ALIGN_LEFT,
-	FONT_ALIGN_CENTER,
-	FONT_ALIGN_RIGHT,
+  FONT_ALIGN_LEFT,
+  FONT_ALIGN_CENTER,
+  FONT_ALIGN_RIGHT,
 } font_align_t;
 
 // Create a font with the given path to the image and path to the width_map.json
