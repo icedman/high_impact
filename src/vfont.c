@@ -4,6 +4,8 @@
 #include <memory.h>
 #include <stdio.h>
 
+#include "render.h"
+
 #define P(x, y) (((x) & 0xF) << 4) | (((y) & 0xF) << 0)
 #define C(c) ord(c)
 
@@ -181,3 +183,108 @@ void vfont_init() {
 }
 
 int *vfont_char_points(char c) { return fnt[toupper(c) - ' ']; }
+
+static float _draw_char(char c, vec2_t pos, float size,
+                      bool extentsOnly, int color) {
+  int *pts = vfont_char_points(c);
+  int next_moveto = 1;
+  vec2_t startPosition = vec2(0, 0);
+
+  float adv = 0;
+  float x = 0;
+  float y = 0;
+
+  for (int i = 0; i < 8; i++) {
+    int delta = pts[i];
+    if (delta == FONT_LAST)
+      break;
+    if (delta == FONT_UP) {
+      next_moveto = 1;
+      continue;
+    }
+
+    float dx = ((delta >> 4) & 0xF) * size;
+    float dy = ((delta >> 0) & 0xF) * -size;
+
+    if (next_moveto != 0) {
+      startPosition.x = pos.x + x + dx;
+      startPosition.y = pos.y + y + dy;
+      if (x + dx > adv)
+        adv = x + dx + (size * 4);
+    } else {
+      vec2_t nextPosition = vec2(pos.x + x + dx, pos.y + y + dy);
+
+      if (x + dx > adv)
+        adv = x + dx + (size * 4);
+
+      if (!extentsOnly) {
+        render_draw_line(startPosition, nextPosition, color);
+      }
+
+      startPosition = nextPosition;
+    }
+
+    next_moveto = 0;
+
+    adv -= x;
+    if (adv < 12 * size) {
+      adv = 12 * size;
+    }
+  }
+
+  return adv;
+}
+
+float vfont_draw(char *text, vec2_t pos, float size,
+                      int align, int color) {
+  float extents = 0;
+  int len = strlen(text);
+
+  float x = pos.x;
+  float y = pos.y;
+
+  // get extents
+  for (int i = 0; i < len; i++) {
+    char c = text[i];
+    vec2_t p;
+    p.x = x;
+    p.y = y;
+    float adv = _draw_char(c, p, size, true, color);
+    if (c == ' ') {
+      adv = _draw_char('.', p, size, true, color) / 2;
+    }
+    extents += adv;
+  }
+
+  // center
+  if (align == 0) {
+    x -= extents / 2;
+  }
+
+  // right
+  if (align == 2) {
+    x -= extents;
+  }
+
+  for (int i = 0; i < len; i++) {
+    char c = text[i];
+    vec2_t p;
+    p.x = x;
+    p.y = y + (-size * 0.5);
+    float adv = _draw_char(c, p, size, false, color);
+    if (c == ' ') {
+      adv = _draw_char('.', p, size, true, color) / 2;
+    }
+    x += adv;
+
+    // if (context->textEffectTyping != 0) {
+    //   if (context->drawCharCount >= context->textEffectTyping) {
+    //     printf("%d %f\n", context->drawCharCount, context->textEffectTyping);
+    //     return x;
+    //   }
+    //   context->drawCharCount++;
+    // }
+  }
+
+  return x;
+}
