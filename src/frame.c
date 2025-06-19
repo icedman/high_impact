@@ -21,6 +21,13 @@ void frame_draw(vec2_t v1, vec2_t v2, int frame_style, int color) {
 
 	vec2_t slice_size = vec2(8, 8);
 
+	if (color == 1) {
+		image_draw_ex(sprite, vec2(src_pos.x + 8 * 1, src_pos.y + 8 * 1), 
+					vec2(16, 16),
+                   vec2(v1.x + 8 * 1, v1.y + 8 * 1),
+                   vec2(v2.x - v1.x - 16, v2.y - v1.y - 16), rgba_white());		
+	}
+
 	for(int i=v1.x; i<v2.x; i+=8) {
 		// top
 		image_draw_ex(sprite, vec2(src_pos.x + 8 * 1, src_pos.y), slice_size,
