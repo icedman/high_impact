@@ -143,4 +143,23 @@ texture_t texture_create(vec2i_t size, rgba_t *pixels);
 void texture_replace_pixels(texture_t texture_handle, vec2i_t size,
                             rgba_t *pixels);
 
+void render_draw_polygon(vec2_t *points, int count, int color);
+void render_draw_circle(vec2_t pos, int radius, int color);
+void render_draw_rect(vec2_t v1, vec2_t v2, int color);
+void render_draw_triangle(vec2_t v1, vec2_t v2, vec2_t v3, int color);
+void render_draw_line(vec2_t v1, vec2_t v2, int color);
+
+void render_set_colors(float *colors, int count);
+void render_clear(int pattern);
+
+void render_draw_rect_fill(vec2_t v1, vec2_t v2, int color);
+void render_draw_triangle_fill(vec2_t v1, vec2_t v2, vec2_t v3, int color);
+void render_draw_polygon_fill(vec2_t *points, int count, int color);
+void render_draw_circle_fill(vec2_t pos, int radius, int color);
+
+typedef struct {
+    int a, b, c;
+} triangle_t;
+int triangulate_polygon(vec2_t *points, int count, triangle_t **out_tris);
+
 #endif

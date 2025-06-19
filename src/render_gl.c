@@ -735,3 +735,54 @@ void texture_replace_pixels(texture_t texture_handle, vec2i_t size,
 // 	stbi_write_png(path, width, height, 4, pixels, 0);
 // 	free(pixels);
 // }
+
+
+void render_draw_rect(vec2_t v1, vec2_t v2, int color) {
+}
+
+void render_draw_triangle(vec2_t v1, vec2_t v2, vec2_t v3, int color) {}
+
+void render_draw_line(vec2_t v1, vec2_t v2, int color) {
+  float sz = 2;
+
+  v1.x *= sz;
+  v1.y *= sz;
+  v2.x *= sz;
+  v2.y *= sz;
+
+  vec2_t dir = vec2_sub(v2, v1);
+  float l = vec2_len(dir);
+  dir.x /= l;
+  dir.y /= l;
+
+  rgba_t clr = rgba_white();
+  if (color == 0) {
+    clr = rgba(0, 0, 0, 255);
+  }
+
+  double x1 = v1.x;
+  double y1 = v1.y;
+  double x2 = v2.x;
+  double y2 = v2.y;
+
+  double w = screen_size.x;
+  double h = screen_size.y;
+
+  x1 = 2*x1 / w - 1;
+  y1 = 2*y1 / h - 1;
+
+  x2 = 2*x2 / w - 1;
+  y2 = 2*y2 / h - 1;
+
+  glLineWidth(15);
+  glColor3f(1.0, 1.0, 0.0);
+
+  glBegin(GL_LINES);
+      glVertex2f(x1, y1);
+      glVertex2f(x2, y2);
+  glEnd();
+}
+
+void render_clear(int pattern) {
+  render_draw_rect(vec2(0, 0), vec2(screen_size.x, screen_size.y), pattern);
+}

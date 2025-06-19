@@ -12,6 +12,9 @@ LCDFont *systemFont = NULL;
 
 PlaydateAPI *playdate = NULL;
 
+static float crankClockWise = 0;
+static float crankCounterClockWise = 0;
+
 static int platform_update(void *userdata) {
   PlaydateAPI *pd = playdate;
 
@@ -26,6 +29,45 @@ static int platform_update(void *userdata) {
   input_set_button_state(INPUT_GAMEPAD_A, current & kButtonA);
   input_set_button_state(INPUT_GAMEPAD_B, current & kButtonB);
 
+  bool crankup = false;
+  bool crankdown = false;
+  float angleThreshold = 60;
+  if (!pd->system->isCrankDocked()) {
+    float change = pd->system->getCrankChange();
+    if (change != 0) {
+      if (change > 0) {
+        crankClockWise += change;
+        crankCounterClockWise -= engine.tick;
+        if (crankClockWise > angleThreshold) {
+          // printf("crankUp %f\n", change);
+          crankClockWise -= angleThreshold;
+          crankup = true;
+        }
+      } else if (change < 0) {
+        crankCounterClockWise += abs(change);
+        crankClockWise -= engine.tick;
+        if (crankCounterClockWise > angleThreshold) {
+          // printf("crankDown\n");
+          crankCounterClockWise -= angleThreshold;
+          crankdown = true;
+        }
+      } else {
+        crankClockWise -= engine.tick;
+        crankCounterClockWise -= engine.tick;
+      }
+      if (crankClockWise < 0) {
+        crankClockWise = 0;
+      }
+      if (crankCounterClockWise < 0) {
+        crankCounterClockWise = 0;
+      }
+    }
+    // game.crankPreviousValue = pd->system->getCrankAngle();
+  }
+
+  input_set_button_state(INPUT_KEY_Q, crankup);
+  input_set_button_state(INPUT_KEY_W, crankdown);
+  
   platform_prepare_frame();
   engine_update();
   platform_end_frame();
@@ -70,8 +112,8 @@ void platform_prepare_frame(void) {
 }
 
 void platform_end_frame(void) {
-  PlaydateAPI *pd = playdate;
-  pd->system->drawFPS(0, 0);
+  // PlaydateAPI *pd = playdate;
+  // pd->system->drawFPS(0, 0);
 }
 
 // Load a file into temp memory. Must be freed via temp_free()
@@ -97,9 +139,15 @@ uint32_t platform_samplerate(void) { return platform_output_samplerate; }
 
 void exit(int) {}
 void abort(void) {}
+void _open_r(void) {}
 void _close(void) {}
 void _read(void) {}
 void _write(void) {}
 void _fstat(void) {}
 void _lseek_r(void) {}
 void _isatty(void) {}
+void _link(void) {}
+void _unlink(void) {}
+void _gettimeofday(void) {}
+void __exidx_start(void) {}
+void __exidx_end(void) {}

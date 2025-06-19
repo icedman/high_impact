@@ -91,7 +91,7 @@
   }
 
 // A fair Fisher-Yates shuffle
-#define shuffle(LIST, LEN)                                                     \
+#define _shuffle(LIST, LEN)                                                     \
   for (int i = (LEN) - 1; i > 0; i--) {                                        \
     int j = rand_int(0, i);                                                    \
     swap((LIST)[i], (LIST)[j]);                                                \

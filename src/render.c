@@ -143,3 +143,70 @@ void render_draw(vec2_t pos, vec2_t size, texture_t texture_handle,
 
   render_draw_quad(&q, texture_handle);
 }
+
+static float cross(const vec2_t *o, const vec2_t *a, const vec2_t *b) {
+    return (a->x - o->x) * (b->y - o->y) - (a->y - o->y) * (b->x - o->x);
+}
+
+static bool point_in_triangle(vec2_t p, vec2_t a, vec2_t b, vec2_t c) {
+    float area = cross(&a, &b, &c);
+    float area1 = cross(&p, &a, &b);
+    float area2 = cross(&p, &b, &c);
+    float area3 = cross(&p, &c, &a);
+    bool same_sign = (area1 >= 0 && area2 >= 0 && area3 >= 0) ||
+                     (area1 <= 0 && area2 <= 0 && area3 <= 0);
+    return same_sign;
+}
+
+int triangulate_polygon(vec2_t *points, int count, triangle_t **out_tris) {
+    if (count < 3) return 0;
+
+    int *V = malloc(sizeof(int) * count);
+    for (int i = 0; i < count; i++) V[i] = i;
+
+    triangle_t *triangles = malloc(sizeof(triangle_t) * (count - 2));
+    int tri_count = 0;
+
+    int nv = count;
+    int i = 0, count_guard = 0;
+
+    while (nv > 3 && count_guard++ < 1000) {
+        int i0 = V[(i + nv - 1) % nv];
+        int i1 = V[i % nv];
+        int i2 = V[(i + 1) % nv];
+
+        vec2_t a = points[i0], b = points[i1], c = points[i2];
+        if (cross(&a, &b, &c) <= 0) {
+            i = (i + 1) % nv;
+            continue;
+        }
+
+        bool ear = true;
+        for (int j = 0; j < nv; j++) {
+            int vi = V[j];
+            if (vi == i0 || vi == i1 || vi == i2) continue;
+            if (point_in_triangle(points[vi], a, b, c)) {
+                ear = false;
+                break;
+            }
+        }
+
+        if (ear) {
+            triangles[tri_count++] = (triangle_t){i0, i1, i2};
+            for (int j = i; j < nv - 1; j++)
+                V[j] = V[j + 1];
+            nv--;
+            i = 0;
+        } else {
+            i = (i + 1) % nv;
+        }
+    }
+
+    if (nv == 3) {
+        triangles[tri_count++] = (triangle_t){V[0], V[1], V[2]};
+    }
+
+    free(V);
+    *out_tris = triangles;
+    return tri_count;
+}

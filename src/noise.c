@@ -23,7 +23,7 @@ noise_t *noise(uint8_t size_bits) {
     n->p[i] = i;
   }
 
-  shuffle(n->p, size);
+  _shuffle(n->p, size);
   return n;
 }
 
